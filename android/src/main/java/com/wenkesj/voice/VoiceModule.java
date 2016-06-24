@@ -28,7 +28,7 @@ import javax.annotation.Nullable;
 public class VoiceModule extends ReactContextBaseJavaModule implements RecognitionListener {
 
   final ReactApplicationContext reactContext;
-  private SpeechRecognizer speech = null;
+  private static SpeechRecognizer speech = null;
   private boolean isRecognizing = false;
 
   public VoiceModule(ReactApplicationContext reactContext) {
@@ -58,12 +58,14 @@ public class VoiceModule extends ReactContextBaseJavaModule implements Recogniti
       @Override
       public void run() {
         try {
-          speech = SpeechRecognizer.createSpeechRecognizer(self.reactContext);
+          if(speech == null) {
+            speech = SpeechRecognizer.createSpeechRecognizer(self.reactContext);
+            speech.setRecognitionListener(self);
+          }
         } catch(Exception e) {
           callback.invoke(e);
         }
 
-        speech.setRecognitionListener(self);
 
         final Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
